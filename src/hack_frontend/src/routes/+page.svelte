@@ -11,7 +11,11 @@
     });
     return false;
   }
+
+
 </script>
+
+
 
 <main>
   <img src="/logo2.svg" alt="DFINITY logo" />
@@ -23,4 +27,5 @@
     <button type="submit">Click Me!</button>
   </form>
   <section id="greeting">{greeting}</section>
+  <button href="/home">Go to Home</button>
 </main>
