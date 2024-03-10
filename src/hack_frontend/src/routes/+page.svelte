@@ -1,6 +1,7 @@
 <script>
   import "../index.scss";
   import { backend } from "$lib/canisters";
+  import Auth from "../components/Auth.svelte";
 
   let greeting = "";
 
@@ -27,5 +28,6 @@
     <button type="submit">Click Me!</button>
   </form>
   <section id="greeting">{greeting}</section>
+  <Auth />
   <button href="/home">Go to Home</button>
 </main>
