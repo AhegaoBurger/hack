@@ -104,6 +104,7 @@ actor DAO {
                 let rpcService : RpcService = #Custom(customRPCapi);
 
                 switch(await evmRPC.request(rpcService, flag, cycles)) {
+                        
                         case(#Err(error)) { 
 
                                 switch(error) {
