@@ -4,7 +4,7 @@ import Nat64 "mo:base/Nat64";
 import Nat "mo:base/Nat";
 import Text "mo:base/Text";
 
-actor DAO {
+actor {
 
         type Result<A, B> = Result.Result<A, B>;
         public type HttpHeader = { value : Text; name : Text };
@@ -128,33 +128,16 @@ actor DAO {
                         };
                 }; 
         };
-
-        // public type JsonRpcError = { code : Int64; message : Text };
         
-        // public type ProviderError = {
-        //         #TooFewCycles : { expected : Nat; received : Nat };
-        //         #MissingRequiredProvider;
-        //         #ProviderNotFound;
-        //         #NoPermission;
-        // };
+        public query func greet(name : Text) : async Text {
+          return "Hello, " # name # "!";
+        };
 
-        // public type ValidationError = {
-        //         #CredentialPathNotAllowed;
-        //         #HostNotAllowed : Text;
-        //         #CredentialHeaderNotAllowed;
-        //         #UrlParseError : Text;
-        //         #Custom : Text;
-        //         #InvalidHex : Text;
-        // };
+        public shared query (msg) func whoami() : async Principal {
+              return msg.caller;
+          };
 
-        // public type HttpOutcallError = {
-        //         #IcError : { code : RejectionCode; message : Text };
-        //         #InvalidHttpJsonRpcResponse : {
-        //         status : Nat16;
-        //         body : Text;
-        //         parsingError : ?Text;
-        //         };
-        // };
+ 
 
 
 }
