@@ -1,12 +1,13 @@
 <script>
   import "../index.scss";
-  import { backend } from "$lib/canisters";
-  import Auth from "../components/Auth.svelte";
-  import { Button } from '$lib/components/ui/button'
-  import { Input } from '$lib/components/ui/input';
-  import { auth, createActor } from '../store/auth';
+
   import { AuthClient } from "@dfinity/auth-client";
   import { onMount } from "svelte";
+  import { auth, createActor } from '../store/auth';
+  import { backend } from "$lib/canisters";
+  import { Button } from '$lib/components/ui/button'
+  import { Input } from '$lib/components/ui/input';
+  
   import * as Card from "$lib/components/ui/card/index"
 
   /** @type {AuthClient} */
@@ -72,22 +73,25 @@
   <!-- <Auth /> -->
 </main>
 
+<div>
+  {#await whoami}
+    Querying caller identity...
+  {:then principal}
+    Your principal ID is
+    <code>{principal}</code>
+
+    {#if principal.isAnonymous()}
+      (anonymous)
+    {/if}
+  {/await}
+</div>
+
 <Card.Root class="w-[350px]">
   <Card.Header>
     <Card.Title>Create project</Card.Title>
     <Card.Description>Deploy your new project in one-click.</Card.Description>
   </Card.Header>
   <Card.Content>
-    {#await whoami}
-      Querying caller identity...
-    {:then principal}
-      Your principal ID is
-      <code>{principal}</code>
-
-      {#if principal.isAnonymous()}
-        (anonymous)
-      {/if}
-    {/await}
     {JSON.stringify(testRPCValue)}
   </Card.Content>
   <Card.Footer class="flex justify-between">

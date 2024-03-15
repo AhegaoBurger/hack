@@ -111,6 +111,16 @@
 							<DropdownMenu.Label class="font-normal">
 								<div class="flex flex-col space-y-1">
 									<p class="text-sm font-medium leading-none">
+										{#await whoami}
+										Querying caller identity...
+										{:then principal}
+										Your principal ID is
+										<code>{principal}</code>
+
+										{#if principal.isAnonymous()}
+											(anonymous)
+										{/if}
+										{/await}
 										Name and Surname
 										<!-- {session?.user.user_metadata.name 
 											? session.user.user_metadata.name[0] 
@@ -142,80 +152,10 @@
 							</DropdownMenu.Item>
 						</DropdownMenu.Content>
 					</DropdownMenu.Root>
-
-                    <!-- <div>
-                    <Button on:click={logout}>Log out</Button>
-                    <button on:click={logout}>Log out</button>
-                    </div> -->
                 {:else}
-					<!-- <a
-						href="/login"
-						class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-					>
-						Login
-					</a> -->
                     <Button on:click={login}>Log in</Button>
-                    <!-- <button on:click={login}>Authenticate in with Internet Identity</button> -->
                 {/if}
 			</div>
-			<!-- <div class="ml-auto flex items-center space-x-4">
-				{#if session}
-					<DropdownMenu.Root>
-						<DropdownMenu.Trigger asChild let:builder>
-							<Button variant="ghost" builders={[builder]} class="relative h-8 w-8 rounded-full">
-								<Avatar.Root class="h-8 w-8">
-									<Avatar.Fallback>
-										{session?.user.user_metadata.name 
-											? session.user.user_metadata.name[0] 
-											: (session?.user.user_metadata.first_name[0] + (session?.user.user_metadata.last_name ? session.user.user_metadata.last_name[0] : ''))
-										}
-									</Avatar.Fallback>
-								</Avatar.Root>
-							</Button>
-						</DropdownMenu.Trigger>
-						<DropdownMenu.Content class="w-56" align="end">
-							<DropdownMenu.Label class="font-normal">
-								<div class="flex flex-col space-y-1">
-									<p class="text-sm font-medium leading-none">
-										{session?.user.user_metadata.name 
-											? session.user.user_metadata.name[0] 
-											: (session?.user.user_metadata.first_name[0] + (session?.user.user_metadata.last_name ? session.user.user_metadata.last_name[0] : ''))
-										}
-									</p>
-									<p class="text-xs leading-none text-muted-foreground">{session?.user.email}</p>
-								</div>
-							</DropdownMenu.Label>
-							<DropdownMenu.Separator />
-							<DropdownMenu.Group>
-								<DropdownMenu.Item href="/settings">
-									Profile
-									<DropdownMenu.Shortcut>⇧⌘P</DropdownMenu.Shortcut>
-								</DropdownMenu.Item>
-								<DropdownMenu.Item href="billing">
-									Billing
-									<DropdownMenu.Shortcut>⌘B</DropdownMenu.Shortcut>
-								</DropdownMenu.Item>
-								<DropdownMenu.Item href="/settings">
-									Settings
-									<DropdownMenu.Shortcut>⌘S</DropdownMenu.Shortcut>
-								</DropdownMenu.Item>
-							</DropdownMenu.Group>
-							<DropdownMenu.Separator />
-							<DropdownMenu.Item on:click={logout}>
-								Log out
-								<DropdownMenu.Shortcut>⇧⌘Q</DropdownMenu.Shortcut>
-							</DropdownMenu.Item>
-						</DropdownMenu.Content>
-					</DropdownMenu.Root>
-				{:else}
-					<a
-						href="/login"
-						class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-					>
-						Login
-					</a>
-				{/if}
-			</div> -->
 		</div>
 	</div>
 </div>		
