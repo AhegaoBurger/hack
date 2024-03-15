@@ -1,6 +1,8 @@
 import Time "mo:base/Time";
 import Result "mo:base/Result";
 import HashMap "mo:base/HashMap";
+import Nat64 "mo:base/Nat64";
+
 module {
 
     public type Result<Ok, Err> = Result.Result<Ok, Err>;
@@ -34,4 +36,10 @@ module {
         voteScore : Int; // A score based on the votes
         status : ProposalStatus; // The current status of the proposal
     };
+
+    public type Community = {
+        id : Nat;
+        name : Text;
+        smartContractAddr : Text;
+    }
 };

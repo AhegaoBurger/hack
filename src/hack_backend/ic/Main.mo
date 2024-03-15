@@ -7,23 +7,30 @@ import EvmRpc "../lib/Evm_rpc";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat16 "mo:base/Nat16";
 import Iter "mo:base/Iter";
-import Community "Community";
+import Proposal "Proposal";
 import Map "mo:map/Map";
 import { nhash } "mo:map/Map";
+import Types "types";
+import Community "Community";
 
 
 actor {
 
-    type Community = Community.Community;
-    type Result<A, B> = Result.Result<A, B>;
+    let CommunityObj = Community.Community();
+    type Proposal = Proposal.Proposal;
+    type Result<A, B> = Types.Result<A, B>;
+    type CommunityT = Types.Community;
 
     stable let evmRPC = actor("xhcuo-6yaaa-aaaar-qacqq-cai") : actor {
             request : shared (EvmRpc.RpcService, Text, Nat64) -> async EvmRpc.RequestResult;
     };
 
     //Main keeps state of all of the communities
-    let communitiesMap = Map.new<Nat, Community.Community>(); //stable map
-    stable var nextCommunityID = 0;
+    let communities = Map.new<Nat, CommunityT>(); //stable map
+    let proposalsByCommunity = Map.new<Nat, Proposal.Proposal>(); //stable map
+    stable var nextCommunityID : Nat = 0;
+
+
   
     public query func greet(name : Text) : async Text {
         return "Hello, " # name # "!";
@@ -38,28 +45,29 @@ actor {
     - should check if the caller is the owner of the contract (not done)
     - should check if already exists a community with that contract (not done)
     */
-    public shared func createCommunity(smartContractAddress: Text, name: Text) : async Result<Text, ()> {
+    public shared func createCommunity(smartContractAddr: Text, name: Text) : async Result<Text, ()> {
 
         Cycles.add(100000000000);
-        let newCommunity = await Community.Community(smartContractAddress, name);
-        
+       
+        let newCommunity : CommunityT = await CommunityObj.createCommunity(nextCommunityID, smartContractAddr, name);
+
         //if all the conditions are met
-        Map.set(communitiesMap, nhash, nextCommunityID,  newCommunity);
+        Map.set<Nat, CommunityT>(communities, nhash, nextCommunityID,  newCommunity);
+
         nextCommunityID += 1;
-
         //maybe change to return the community
-        return #ok("Created Commmunity " # Nat.toText((nextCommunityID-1)) # "with name: " # name # ", address: " # smartContractAddress);
+        return #ok("Created Commmunity " # Nat.toText((nextCommunityID-1)) # " with name: " # name # ", address: " # smartContractAddr);
     };
 
-    public shared query func getCommunity(id: Nat) : async Result<Community, Text> {
-        switch(Map.get<Nat, Community>(communitiesMap, nhash, id)) {
-                        case(null) { return #err("Community not found"); };
-                        case(? community) { return #ok(community)};
-                }; 
+    public shared query func getCommunity(id: Nat) : async Result<CommunityT, Text> {
+        switch(Map.get<Nat, CommunityT>(communities, nhash, id)) {
+                case(null) { return #err("Community not found"); };
+                case(? community) { return #ok(community)};
+        }; 
     };
 
-    public shared query func getAllCommunities() : async [Community] {
-        return Iter.toArray(Map.vals<Nat, Community>(communitiesMap));
+    public shared query func getAllCommunities() : async [CommunityT] {
+        return Iter.toArray(Map.vals<Nat, CommunityT>(communities));
     };
 
   
@@ -81,7 +89,7 @@ actor {
                 
                 case(#Err(error)) { 
                         switch(error) {
-                                case(#JsonRpcError(msg)) { return #err("AAAAAAA" # msg.message) };
+                                case(#JsonRpcError(msg)) { return #err("JsonRpcError: " # msg.message) };
                                 case(#ProviderError(msg)) { 
                                     switch(msg) {
                                             case(#TooFewCycles(fewCyclesError)) { return #err("expected: " # Nat.toText(fewCyclesError.expected) # " received: " # Nat.toText(fewCyclesError.received))  };
