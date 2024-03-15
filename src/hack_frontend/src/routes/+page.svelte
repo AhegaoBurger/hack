@@ -47,7 +47,7 @@
   let testRPCValue = "Nothing yet";
 
   async function testRPC() {
-		backend.testRPC().then((response) => {
+		backend.getBalanceTokens().then((response) => {
       testRPCValue = response
     })
 	}
