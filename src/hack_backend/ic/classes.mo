@@ -15,11 +15,13 @@ import Types "types";
 
 class Proposal(){
 
+    type Member = Types.Member;
     type Result<Ok, Err> = Types.Result<Ok, Err>;
     type HashMap<K, V> = Types.HashMap<K, V>;
     type Proposal = Types.Proposal;
     type ProposalContent = Types.ProposalContent;
     type ProposalId = Types.ProposalId;
+
 
     var nextProposalId : Nat64 = 0;
     let proposals = HashMap.HashMap<ProposalId, Proposal>(0, Nat64.equal, Nat64.toNat32);
@@ -34,10 +36,6 @@ class Proposal(){
                 return #err("The caller is not a member - cannot create a proposal");
             };
             case (?member) {
-                let balance = Option.get(ledger.get(caller), 0);
-                if (balance < 1) {
-                    return #err("The caller does not have enough tokens to create a proposal");
-                };
                 // Create the proposal and burn the tokens
                 let proposal : Proposal = {
                     id = nextProposalId;
@@ -51,7 +49,6 @@ class Proposal(){
                 };
                 proposals.put(nextProposalId, proposal);
                 nextProposalId += 1;
-                _burn(caller, 1);
                 return #ok(nextProposalId - 1);
             };
         };
