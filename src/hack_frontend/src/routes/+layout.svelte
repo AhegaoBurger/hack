@@ -54,6 +54,8 @@
         whoami = $auth.actor.whoami();
     }
 
+	let canisterId = process.env.CANISTER_ID_HACK_FRONTEND
+
 </script>
 
 <div class="hidden flex-col md:flex">
@@ -61,7 +63,7 @@
 		<div class="flex h-16 items-center px-4">
 			<nav class="flex items-center space-x-4 lg:space-x-6">
 				<a 
-					href="/"
+					href='/?canisterId={canisterId}'
 					class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 				>
 					
@@ -69,13 +71,13 @@
 				</a>
 
 				<a
-					href="/faq"
+					href="/faq?canisterId={canisterId}"
 					class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 				>
 					FAQ
 				</a>
 				<a
-					href="/about"
+					href="/about?canisterId={canisterId}"
 					class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 				>
 					Reports
