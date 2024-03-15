@@ -6,15 +6,24 @@ import Text "mo:base/Text";
 import EvmRpc "../lib/Evm_rpc";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat16 "mo:base/Nat16";
+import Iter "mo:base/Iter";
+import Community "Community";
+import Map "mo:map/Map";
+import { nhash } "mo:map/Map";
+
 
 actor {
 
+    type Community = Community.Community;
     type Result<A, B> = Result.Result<A, B>;
 
     stable let evmRPC = actor("xhcuo-6yaaa-aaaar-qacqq-cai") : actor {
             request : shared (EvmRpc.RpcService, Text, Nat64) -> async EvmRpc.RequestResult;
     };
 
+    //Main keeps state of all of the communities
+    let communitiesMap = Map.new<Nat, Community.Community>(); //stable map
+    stable var nextCommunityID = 0;
   
     public query func greet(name : Text) : async Text {
         return "Hello, " # name # "!";
@@ -24,11 +33,40 @@ actor {
         return msg.caller;
     };
 
+    /*
+    - creates a Community
+    - should check if the caller is the owner of the contract (not done)
+    - should check if already exists a community with that contract (not done)
+    */
+    public shared func createCommunity(smartContractAddress: Text, name: Text) : async Result<Text, ()> {
+
+        Cycles.add(100000000000);
+        let newCommunity = await Community.Community(smartContractAddress, name);
+        
+        //if all the conditions are met
+        Map.set(communitiesMap, nhash, nextCommunityID,  newCommunity);
+        nextCommunityID += 1;
+
+        //maybe change to return the community
+        return #ok("Created Commmunity " # Nat.toText((nextCommunityID-1)) # "with name: " # name # ", address: " # smartContractAddress);
+    };
+
+    public shared query func getCommunity(id: Nat) : async Result<Community, Text> {
+        switch(Map.get<Nat, Community>(communitiesMap, nhash, id)) {
+                        case(null) { return #err("Community not found"); };
+                        case(? community) { return #ok(community)};
+                }; 
+    };
+
+    public shared query func getAllCommunities() : async [Community] {
+        return Iter.toArray(Map.vals<Nat, Community>(communitiesMap));
+    };
+
   
     public shared func getBalanceTokens() : async Result<Text, Text> {
-        let url : Text = "https://eth-sepolia.g.alchemy.com/v2/NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss";
+        let url : Text = "https://eth-mainnet.g.alchemy.com/v2/NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss";
         let payload : Text = "{\"id\":1,\"jsonrpc\":\"2.0\",\"params\":[\"0x0d7322ca364B01A7b6749BC50786D9b3f9340B04\",\"latest\"],\"method\":\"eth_getBalance\"}";
-        let maxbytes : Nat64 = 1000000;
+        let maxbytes : Nat64 = 2000;
 
         let customRPCapi : EvmRpc.RpcApi = {
                 url = url;
@@ -42,7 +80,6 @@ actor {
         switch(await evmRPC.request(rpcService, payload, maxbytes)) {
                 
                 case(#Err(error)) { 
-
                         switch(error) {
                                 case(#JsonRpcError(msg)) { return #err("AAAAAAA" # msg.message) };
                                 case(#ProviderError(msg)) { 
@@ -79,15 +116,15 @@ actor {
                         };
 
                 };
-                case(#Ok(msg)) {  
-                        return #ok(msg);
+                case(#Ok(msg)) { 
+                    return #ok(msg);
                 };
         }; 
     };
 
-    public shared func  getBalanceNFT() : async Result<Text, Text> {
-        return #err("to implement");
-    };
+    // public shared func  getBalanceNFT() : async Result<Text, Text> {
+    //     return #err("to implement");
+    // };
 
  
 
