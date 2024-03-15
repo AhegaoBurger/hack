@@ -1,4 +1,3 @@
-import Result "mo:base/Result";
 import Nat64 "mo:base/Nat64";
 import Nat "mo:base/Nat";
 import Text "mo:base/Text";

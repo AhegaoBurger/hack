@@ -4,6 +4,8 @@ import Nat64 "mo:base/Nat64";
 import Nat "mo:base/Nat";
 import Text "mo:base/Text";
 import EvmRpc "../lib/Evm_rpc";
+import Cycles "mo:base/ExperimentalCycles";
+import Nat16 "mo:base/Nat16";
 
 actor {
 
@@ -23,48 +25,59 @@ actor {
     };
 
   
-    public shared ({caller}) func getBalanceTokens() : async Result<Text, Text> {
-        let apiKey : Text = "https://eth-sepolia.g.alchemy.com/v2/NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss";
-
-        let flag : Text = "--wallet $(dfx identity get-wallet) --with-cycles";
-        let cycles : Nat64 = 1000000000;
-
-        let request : EvmRpc.HttpHeader = {value = "request"; name = "POST"};
-        let url : EvmRpc.HttpHeader = {value = "url"; name = apiKey};
-        let header : EvmRpc.HttpHeader = {value = "header"; name = "accept: application/json"};
-        let header2 : EvmRpc.HttpHeader = {value = "header"; name = "content-type: application/json"};
-        let data : EvmRpc.HttpHeader = {value = "--data"; name = "{\"id\":1,\"jsonrpc\":\"2.0\",\"params\":[\"0x0d7322ca364B01A7b6749BC50786D9b3f9340B04\",\"latest\"],\"method\":\"eth_getBalance\"}"};
-
-        let headersArray : [EvmRpc.HttpHeader] = [request, url, header, header2, data];
-        // let headersArray : [HttpHeader] = [data];
-
+    public shared func getBalanceTokens() : async Result<Text, Text> {
+        let url : Text = "https://eth-sepolia.g.alchemy.com/v2/NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss";
+        let payload : Text = "{\"id\":1,\"jsonrpc\":\"2.0\",\"params\":[\"0x0d7322ca364B01A7b6749BC50786D9b3f9340B04\",\"latest\"],\"method\":\"eth_getBalance\"}";
+        let maxbytes : Nat64 = 1000000;
 
         let customRPCapi : EvmRpc.RpcApi = {
-                url = apiKey;
-                headers = ?headersArray;
+                url = url;
+                headers = null;
         };
 
         let rpcService : EvmRpc.RpcService = #Custom(customRPCapi);
 
-        switch(await evmRPC.request(rpcService, flag, cycles)) {
+        Cycles.add(30_000_000_000_000);
+
+        switch(await evmRPC.request(rpcService, payload, maxbytes)) {
                 
                 case(#Err(error)) { 
 
                         switch(error) {
-                                case(#JsonRpcError(msg)) { return #err(msg.message) };
+                                case(#JsonRpcError(msg)) { return #err("AAAAAAA" # msg.message) };
                                 case(#ProviderError(msg)) { 
-                                        switch(msg) {
-                                                case(#TooFewCycles(fewCyclesError)) { return #err("caller: " # Principal.toText(caller) #" expected: " # Nat.toText(fewCyclesError.expected) # " received: " # Nat.toText(fewCyclesError.received))  };
-                                                case(#MissingRequiredProvider(_)) {  };
-                                                case(#ProviderNotFound(_)) { };
-                                                case(#NoPermission(_)) { };
-                                        };
+                                    switch(msg) {
+                                            case(#TooFewCycles(fewCyclesError)) { return #err("expected: " # Nat.toText(fewCyclesError.expected) # " received: " # Nat.toText(fewCyclesError.received))  };
+                                            case(#MissingRequiredProvider(errorMessage)) { return #err("MissingRequiredProvider") };
+                                            case(#ProviderNotFound(errorMessage)) {return #err("ProviderNotFound") };
+                                            case(#NoPermission(errorMessage)) {return #err("NoPermission") };
+                                    };
                                 };
-                                case(#ValidationError(msg)) { };
-                                case(#HttpOutcallError(msg)) { };
+                                case(#ValidationError(msg)) { return #err("ValidationError")};
+                                case(#HttpOutcallError(httpError)) { 
+                                    switch(httpError) {
+                                      case(#IcError(icError)) { 
+
+                                          var errorCode : Text = "";
+                                          switch(icError.code) {
+                                            case(#NoError(_)) { errorCode := "NoError" };
+                                            case(#CanisterError(_)) {errorCode := "CanisterError" };
+                                            case(#SysTransient(_)) {errorCode := "SysTransient" };
+                                            case(#DestinationInvalid(_)) {errorCode := "DestinationInvalid" };
+                                            case(#Unknown(_)) {errorCode := "Unknown" };
+                                            case(#SysFatal(_)) {errorCode := "SysFatal" };
+                                            case(#CanisterReject(_)) {errorCode := "CanisterReject" };
+
+                                          };
+                                          return #err("Code: " # errorCode # " message: " # icError.message);
+                                      };
+                                      case(#InvalidHttpJsonRpcResponse(invalidHttpError)) {
+                                          return #err("Status: " # Nat16.toText(invalidHttpError.status) # " body: " # invalidHttpError.body);
+                                      };
+                                    };
+                                };
                         };
 
-                        return #err("ERROOO");
                 };
                 case(#Ok(msg)) {  
                         return #ok(msg);
@@ -72,7 +85,7 @@ actor {
         }; 
     };
 
-    public shared ({caller}) func  getBalanceNFT() : async Result<Text, Text> {
+    public shared func  getBalanceNFT() : async Result<Text, Text> {
         return #err("to implement");
     };
 
