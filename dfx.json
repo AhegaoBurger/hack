@@ -14,7 +14,7 @@
       "declarations": {
         "node_compatibility": true
       },
-      "main": "src/hack_backend/main.mo",
+      "main": "src/hack_backend/ic/Main.mo",
       "type": "motoko"
     },
     "hack_frontend": {
