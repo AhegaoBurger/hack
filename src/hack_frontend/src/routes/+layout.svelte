@@ -7,6 +7,7 @@
     import Button from "$lib/components/ui/button/button.svelte";
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.ts"; 
 	import * as Avatar from "$lib/components/ui/avatar/index.ts";
+	import * as Card from "$lib/components/ui/card/index"
 
     /** @type {AuthClient} */
     let client;
@@ -59,18 +60,22 @@
 	<div class="border-b">
 		<div class="flex h-16 items-center px-4">
 			<nav class="flex items-center space-x-4 lg:space-x-6">
-				<a href="/?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai" class="text-sm font-medium transition-colors hover:text-primary">
+				<a 
+					href="/"
+					class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+				>
+					
 					Overview
 				</a>
 
 				<a
-					href="/faq?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai"
+					href="/faq"
 					class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 				>
 					FAQ
 				</a>
 				<a
-					href="/about?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai"
+					href="/about"
 					class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 				>
 					Reports
@@ -135,6 +140,7 @@
 							</DropdownMenu.Item>
 						</DropdownMenu.Content>
 					</DropdownMenu.Root>
+
                     <!-- <div>
                     <Button on:click={logout}>Log out</Button>
                     <button on:click={logout}>Log out</button>

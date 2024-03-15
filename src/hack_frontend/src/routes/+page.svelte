@@ -3,7 +3,36 @@
   import { backend } from "$lib/canisters";
   import Auth from "../components/Auth.svelte";
   import { Button } from '$lib/components/ui/button'
-  import { Input } from '$lib/components/ui/input'
+  import { Input } from '$lib/components/ui/input';
+  import { auth, createActor } from '../store/auth';
+  import { AuthClient } from "@dfinity/auth-client";
+  import { onMount } from "svelte";
+  import * as Card from "$lib/components/ui/card/index"
+
+  /** @type {AuthClient} */
+  let client;
+
+  let whoami = $auth.actor.whoami();
+
+  onMount(async () => {
+      client = await AuthClient.create();
+      if (await client.isAuthenticated()) {
+      handleAuth();
+      }
+  });
+
+  function handleAuth() {
+      auth.update(() => ({
+      loggedIn: true,
+      actor: createActor({
+          agentOptions: {
+          identity: client.getIdentity(),
+          },
+      }),
+      }));
+
+      whoami = $auth.actor.whoami();
+  }
 
   let greeting = "";
 
@@ -14,6 +43,14 @@
     });
     return false;
   }
+
+  let testRPCValue = "Nothing yet";
+
+  async function testRPC() {
+		backend.testRPC().then((response) => {
+      testRPCValue = response
+    })
+	}
 
 
 </script>
@@ -34,4 +71,27 @@
   <section id="greeting">{greeting}</section>
   <!-- <Auth /> -->
 </main>
+
+<Card.Root class="w-[350px]">
+  <Card.Header>
+    <Card.Title>Create project</Card.Title>
+    <Card.Description>Deploy your new project in one-click.</Card.Description>
+  </Card.Header>
+  <Card.Content>
+    {#await whoami}
+      Querying caller identity...
+    {:then principal}
+      Your principal ID is
+      <code>{principal}</code>
+
+      {#if principal.isAnonymous()}
+        (anonymous)
+      {/if}
+    {/await}
+    {JSON.stringify(testRPCValue)}
+  </Card.Content>
+  <Card.Footer class="flex justify-between">
+    <Button on:click={testRPC}>Press me to check for the RPC</Button>
+  </Card.Footer>
+</Card.Root>
 
