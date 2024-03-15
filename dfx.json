@@ -6,7 +6,7 @@
       "wasm": "https://github.com/internet-computer-protocol/evm-rpc-canister/releases/latest/download/evm_rpc_dev.wasm.gz",
       "remote": {
         "id": {
-          "ic": "a6d44-nyaaa-aaaap-abp7q-cai"
+          "ic": "xhcuo-6yaaa-aaaar-qacqq-cai"
         }
       }
     },
@@ -14,7 +14,7 @@
       "declarations": {
         "node_compatibility": true
       },
-      "main": "src/hack_backend/main.mo",
+      "main": "src/hack_backend/ic/Main.mo",
       "type": "motoko"
     },
     "hack_frontend": {
@@ -26,17 +26,6 @@
       ],
       "type": "assets",
       "workspace": "hack_frontend"
-    },
-    "internet_identity": {
-      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-      "frontend": {},
-      "remote": {
-        "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
-        }
-      },
-      "type": "custom",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
     }
   },
   "defaults": {
