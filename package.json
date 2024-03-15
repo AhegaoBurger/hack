@@ -17,6 +17,6 @@
   ],
   "dependencies": {
     "@dfinity/auth-client": "^1.0.1",
-    "ethers": "^6.11.1"
+    "ethers": "^5.7.2"
   }
 }

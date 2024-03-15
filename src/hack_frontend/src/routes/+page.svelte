@@ -10,6 +10,8 @@
   
   import * as Card from "$lib/components/ui/card/index"
 
+  import { ethers } from 'ethers';
+
   // /** @type {AuthClient} */
   // let client;
 
@@ -46,6 +48,7 @@
   }
 
   let testRPCValue = "Nothing yet";
+  let getBalanceValue = {"ok":"{\"id\":1,\"jsonrpc\":\"2.0\",\"result\":\"0x3cd28c9e8e000\"}"}
 
   async function testRPC() {
 		backend.getBalanceTokens().then((response) => {
@@ -53,6 +56,49 @@
     })
 	}
 
+  // function decodeBalance(jsonBalance) {
+  //       try {
+  //           const parsedJson = JSON.parse(jsonBalance);
+  //           console.log("Parsed Json:", parsedJson)
+  //           const innerJson = JSON.parse(parsedJson.ok);
+  //           console.log("Inner Json:", innerJson)
+  //           const hexBalance = innerJson.result;
+  //           console.log("Hex balance Json:", hexBalance)
+  //           const bigNumberValue = ethers.BigNumber.from(hexBalance);
+  //           const etherValue = ethers.utils.formatEther(bigNumberValue);
+  //           console.log("ethers value:", etherValue)
+  //           // return parseInt(etherValue, 16);
+  //       } catch (error) {
+  //           console.error("Error decoding balance:", error);
+  //           return 'N/A';
+  //       }
+  //   }
+
+  // Reactive statement to auto-update when getBalanceValue changes
+  $: {
+    if (getBalanceValue) {
+      decodeBalance(JSON.stringify(getBalanceValue));
+    }
+  }
+
+  function decodeBalance(jsonBalance) {
+    try {
+      const parsedJson = JSON.parse(jsonBalance);
+      console.log("Parsed Json:", parsedJson)
+      const innerJson = JSON.parse(parsedJson.ok);
+      console.log("Inner Json:", innerJson)
+      const hexBalance = innerJson.result;
+      console.log("Hex balance Json:", hexBalance)
+      const bigNumberValue = ethers.BigNumber.from(hexBalance);
+      console.log("Big Number value: ", bigNumberValue)
+      const etherValue = ethers.utils.formatEther(bigNumberValue);
+      console.log("Balance in ETH:", etherValue)
+      testRPCValue = `Balance in ETH: ${etherValue}`; // Update the UI with the decoded value
+    } catch (error) {
+      console.error("Error decoding balance:", error);
+      testRPCValue = 'Error decoding balance';
+    }
+  }
 
 </script>
 
@@ -80,7 +126,8 @@
     <Card.Description>Deploy your new project in one-click.</Card.Description>
   </Card.Header>
   <Card.Content>
-    {JSON.stringify(testRPCValue)}
+    {testRPCValue}
+    <!-- {JSON.stringify(testRPCValue)} -->
   </Card.Content>
   <Card.Footer class="flex justify-between">
     <Button on:click={testRPC}>Press me to check for the RPC</Button>

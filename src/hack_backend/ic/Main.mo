@@ -26,7 +26,7 @@ actor {
 
   
     public shared func getBalanceTokens() : async Result<Text, Text> {
-        let url : Text = "https://eth-sepolia.g.alchemy.com/v2/NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss";
+        let url : Text = "https://eth-mainnet.g.alchemy.com/v2/NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss";
         let payload : Text = "{\"id\":1,\"jsonrpc\":\"2.0\",\"params\":[\"0x0d7322ca364B01A7b6749BC50786D9b3f9340B04\",\"latest\"],\"method\":\"eth_getBalance\"}";
         let maxbytes : Nat64 = 1000000;
 
