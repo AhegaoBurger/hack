@@ -1,39 +1,39 @@
 <script>
   import "../index.scss";
 
-  import { AuthClient } from "@dfinity/auth-client";
-  import { onMount } from "svelte";
-  import { auth, createActor } from '../store/auth';
+  // import { AuthClient } from "@dfinity/auth-client";
+  // import { onMount } from "svelte";
+  // import { auth, createActor } from '../store/auth';
   import { backend } from "$lib/canisters";
   import { Button } from '$lib/components/ui/button'
   import { Input } from '$lib/components/ui/input';
   
   import * as Card from "$lib/components/ui/card/index"
 
-  /** @type {AuthClient} */
-  let client;
+  // /** @type {AuthClient} */
+  // let client;
 
-  let whoami = $auth.actor.whoami();
+  // let whoami = $auth.actor.whoami();
 
-  onMount(async () => {
-      client = await AuthClient.create();
-      if (await client.isAuthenticated()) {
-      handleAuth();
-      }
-  });
+  // onMount(async () => {
+  //     client = await AuthClient.create();
+  //     if (await client.isAuthenticated()) {
+  //     handleAuth();
+  //     }
+  // });
 
-  function handleAuth() {
-      auth.update(() => ({
-      loggedIn: true,
-      actor: createActor({
-          agentOptions: {
-          identity: client.getIdentity(),
-          },
-      }),
-      }));
+  // function handleAuth() {
+  //     auth.update(() => ({
+  //     loggedIn: true,
+  //     actor: createActor({
+  //         agentOptions: {
+  //         identity: client.getIdentity(),
+  //         },
+  //     }),
+  //     }));
 
-      whoami = $auth.actor.whoami();
-  }
+  //     whoami = $auth.actor.whoami();
+  // }
 
   let greeting = "";
 
@@ -73,18 +73,6 @@
   <!-- <Auth /> -->
 </main>
 
-<div>
-  {#await whoami}
-    Querying caller identity...
-  {:then principal}
-    Your principal ID is
-    <code>{principal}</code>
-
-    {#if principal.isAnonymous()}
-      (anonymous)
-    {/if}
-  {/await}
-</div>
 
 <Card.Root class="w-[350px]">
   <Card.Header>
