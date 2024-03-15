@@ -9,6 +9,11 @@
 	import * as Avatar from "$lib/components/ui/avatar/index.ts";
 	import * as Card from "$lib/components/ui/card/index"
 
+	import { ethers } from 'ethers'
+
+	let balance = 'N/A';
+    let isConnected = false;
+
     /** @type {AuthClient} */
     let client;
 
@@ -56,6 +61,31 @@
 
 	let canisterId = process.env.CANISTER_ID_HACK_FRONTEND
 
+	async function connectWallet() {
+        if (window.ethereum) {
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+				console.log("The signer is: ", signer)
+                // const address = await signer.getAddress();
+				// console.log("The adress is: ", address)
+                // await updateBalance(address);
+                // isConnected = true;
+            } catch (error) {
+                console.error("The error is", error);
+            }
+        } else {
+            console.log('MetaMask is not installed');
+        }
+    }
+
+    async function updateBalance(address) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const balanceBigNumber = await provider.getBalance(address);
+        balance = ethers.utils.formatEther(balanceBigNumber);
+    }
+
 </script>
 
 <div class="hidden flex-col md:flex">
@@ -92,6 +122,7 @@
 				{/if} -->
 			</nav>
 			<div class="ml-auto flex items-center space-x-4">
+				<div>Wallet Balance: {balance} ETH</div>
 				{#if $auth.loggedIn}
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger asChild let:builder>
@@ -112,14 +143,14 @@
 								<div class="flex flex-col space-y-1">
 									<p class="text-sm font-medium leading-none">
 										{#await whoami}
-										Querying caller identity...
+											Querying caller identity...
 										{:then principal}
-										Your principal ID is
-										<code>{principal}</code>
+											Your principal ID is
+											<code>{principal}</code>
 
-										{#if principal.isAnonymous()}
-											(anonymous)
-										{/if}
+											{#if principal.isAnonymous()}
+												(anonymous)
+											{/if}
 										{/await}
 										Name and Surname
 										<!-- {session?.user.user_metadata.name 
@@ -154,6 +185,8 @@
 					</DropdownMenu.Root>
                 {:else}
                     <Button on:click={login}>Log in</Button>
+
+					<Button on:click={connectWallet} disabled={isConnected}>Connect Wallet</Button>
                 {/if}
 			</div>
 		</div>
