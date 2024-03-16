@@ -6,6 +6,7 @@
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.ts"; 
 	import * as Avatar from "$lib/components/ui/avatar/index.ts";
 	import * as Card from "$lib/components/ui/card/index"
+	import { Toaster } from "$lib/components/ui/sonner";
 
 	import { ethers } from 'ethers';
 
@@ -43,7 +44,10 @@
 
 </script>
 
+
 <section class="flex">
+	<Toaster />
+
 	<sidebar class="border-r">
 		<div class="w-16 flex flex-col items-center py-4 space-y-4">
 			<!-- Icons or logo -->
