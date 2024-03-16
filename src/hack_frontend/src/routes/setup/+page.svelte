@@ -11,9 +11,9 @@
 
     async function createCommunity() {
         
-        // backend.createCommunity(smartContractAdress, communityName).then((response) => {
+        backend.createCommunity(smartContractAdress, communityName).then((response) => {
 
-        // });
+        });
         toast.success("Your community has been created", {
             description: "Start this journey by creating your first proposal."
         })
