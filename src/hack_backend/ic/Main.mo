@@ -16,58 +16,57 @@ import Community "Community";
 
 actor {
 
-    let CommunityObj = Community.Community();
-    type Proposal = Proposal.Proposal;
+    //
+    // TYPES
+    //
     type Result<A, B> = Types.Result<A, B>;
+    type Proposal = Proposal.Proposal;
     type CommunityT = Types.Community;
 
+    //
+    // Canisters
+    //
     stable let evmRPC = actor("xhcuo-6yaaa-aaaar-qacqq-cai") : actor {
             request : shared (EvmRpc.RpcService, Text, Nat64) -> async EvmRpc.RequestResult;
     };
 
-    //Main keeps state of all of the communities
+
+    //
+    // State Variables
+    //
     let communities = Map.new<Nat, CommunityT>(); //stable map
     let proposalsByCommunity = Map.new<Nat, Proposal.Proposal>(); //stable map
-    stable var nextCommunityID : Nat = 0;
 
 
-  
-    public query func greet(name : Text) : async Text {
-        return "Hello, " # name # "!";
-    };
-
-    public shared query (msg) func whoami() : async Principal {
-        return msg.caller;
-    };
+    let cmtObj = Community.Community(communities);
 
     /*
     - creates a Community
     - should check if the caller is the owner of the contract (not done)
     - should check if already exists a community with that contract (not done)
     */
-    public shared func createCommunity(smartContractAddr: Text, name: Text) : async Result<Text, ()> {
+    public shared func createCommunity(smartContractAddr: Text, name: Text) : async Result<CommunityT, Text> {
 
         Cycles.add(100000000000);
-       
-        let newCommunity : CommunityT = await CommunityObj.createCommunity(nextCommunityID, smartContractAddr, name);
 
-        //if all the conditions are met
-        Map.set<Nat, CommunityT>(communities, nhash, nextCommunityID,  newCommunity);
 
-        nextCommunityID += 1;
-        //maybe change to return the community
-        return #ok("Created Commmunity " # Nat.toText((nextCommunityID-1)) # " with name: " # name # ", address: " # smartContractAddr);
+        switch(cmtObj.createCommunity(smartContractAddr, name)) {
+            case(#ok(cmt)) { return #ok(cmt) };
+            case(#err(error)) { return #err(error) };
+        }; 
+
     };
 
     public shared query func getCommunity(id: Nat) : async Result<CommunityT, Text> {
-        switch(Map.get<Nat, CommunityT>(communities, nhash, id)) {
-                case(null) { return #err("Community not found"); };
-                case(? community) { return #ok(community)};
-        }; 
+        switch(cmtObj.getCommunity(id)) {
+            case(#ok(cmt)) { return #ok(cmt) };
+            case(#err(error)) { return #err(error) };
+        };
+
     };
 
     public shared query func getAllCommunities() : async [CommunityT] {
-        return Iter.toArray(Map.vals<Nat, CommunityT>(communities));
+        return cmtObj.getAllCommunities();
     };
 
   
@@ -128,6 +127,14 @@ actor {
                     return #ok(msg);
                 };
         }; 
+    };
+
+        public query func greet(name : Text) : async Text {
+        return "Hello, " # name # "!";
+    };
+
+    public shared query (msg) func whoami() : async Principal {
+        return msg.caller;
     };
 
     // public shared func  getBalanceNFT() : async Result<Text, Text> {
