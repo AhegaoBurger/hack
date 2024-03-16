@@ -2,13 +2,39 @@
 <script>
     import "../app.pcss";
 
+	import { backend } from "$lib/canisters";
+
     import Button from "$lib/components/ui/button/button.svelte";
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.ts"; 
 	import * as Avatar from "$lib/components/ui/avatar/index.ts";
 	import * as Card from "$lib/components/ui/card/index"
 	import { Toaster } from "svelte-sonner";
 
+	import { onMount } from "svelte";
+
 	import { ethers } from 'ethers';
+
+	let communities;
+
+	export let data;
+
+	// let communities = [{name: "hack", address: "test"}, {name: "artur", address: "done"}];
+
+	onMount(async() => {
+		try {
+			const response = data.communities;
+			const data = JSON.parse(response); // Assuming 'response' is a JSON string. Adjust as necessary.
+
+            // Now, map the data to fit your 'communities' structure
+            communities = data.map((item) => ({
+                name: item.name,
+                address: item.smartContractAddr
+            }));
+		} catch (error) {
+			console.error("Failed to load communities:", error);
+		}
+		
+	})
 
 	let balance = 'N/A';
 	let MetaMaskAdress;
@@ -45,12 +71,11 @@
 	function capitalizeFirstLetter() {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
-
-	let communities = [{name: "hack", address: "test"}, {name: "artur", address: "done"}];
+	
 
 </script>
 <Toaster />
-<section class="flex">
+<section class="flex h-full">
 	<!-- Vertical Navbar -->
 	<sidebar class="border-r">
 		<div class="w-16 flex flex-col items-center py-4 space-y-4">
@@ -58,9 +83,11 @@
 			<!-- Navigation Icons -->
 			<div class="flex flex-col space-y-2">
 				<!-- Replace with your actual icons -->
-				{#each communities as community }
-					<a href="/{community.name}?canisterId={canisterId}" class="p-2 hover:bg-gray-700 rounded-md"><img src="/favicon.ico" alt="" class="w-6 h-6"></a>
-				{/each}
+				{#if communities}
+					{#each communities as community }
+						<a href="/{community.name}?canisterId={canisterId}" class="p-2 hover:bg-gray-700 rounded-md"><img src="/favicon.ico" alt="" class="w-6 h-6"></a>
+					{/each}
+				{/if}					
 				<!-- <a href="/" class="p-2 hover:bg-gray-700 rounded-md"><img src="/favicon.ico" alt="Dashboard" class="w-6 h-6"></a>
 				<a href="/" class="p-2 hover:bg-gray-700 rounded-md"><img src="/favicon.ico" alt="Dashboard" class="w-6 h-6"></a> -->
 				<a href="/setup?canisterId={canisterId}" class="p-2 hover:bg-gray-700 rounded-md"><img src="/plus-solid.svg" alt="Dashboard" class="w-6 h-6"></a>
@@ -75,7 +102,7 @@
 			<!-- Main Content -->
 			<div class="border-b">
 				<div class="flex-grow">
-					<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+					<div class="max-w-7xl py-6 sm:px-6 lg:px-8">
 						<!-- Your content here -->
 						<nav class="flex items-center space-x-4 lg:space-x-6">
 							<a 
