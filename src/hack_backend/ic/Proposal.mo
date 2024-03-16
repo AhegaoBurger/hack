@@ -47,6 +47,7 @@ module {
                 isTempCheck = isTempCheck;
             };
 
+
             Vector.add(list, newProposal);
             Map.set<Nat, Vector.Vector<ProposalT>>(proposalsMap, nhash, cmtID, list);
 
