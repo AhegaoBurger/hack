@@ -1,9 +1,7 @@
+<!-- src/hack_frontend/src/routes/+page.svelte -->
 <script>
   import "../index.scss";
 
-  // import { AuthClient } from "@dfinity/auth-client";
-  // import { onMount } from "svelte";
-  // import { auth, createActor } from '../store/auth';
   import { backend } from "$lib/canisters";
   import { Button } from '$lib/components/ui/button'
   import { Input } from '$lib/components/ui/input';
@@ -11,31 +9,6 @@
   import * as Card from "$lib/components/ui/card/index"
 
   import { ethers } from 'ethers';
-
-  // /** @type {AuthClient} */
-  // let client;
-
-  // let whoami = $auth.actor.whoami();
-
-  // onMount(async () => {
-  //     client = await AuthClient.create();
-  //     if (await client.isAuthenticated()) {
-  //     handleAuth();
-  //     }
-  // });
-
-  // function handleAuth() {
-  //     auth.update(() => ({
-  //     loggedIn: true,
-  //     actor: createActor({
-  //         agentOptions: {
-  //         identity: client.getIdentity(),
-  //         },
-  //     }),
-  //     }));
-
-  //     whoami = $auth.actor.whoami();
-  // }
 
   let greeting = "";
 
@@ -55,24 +28,6 @@
       testRPCValue = response
     })
 	}
-
-  // function decodeBalance(jsonBalance) {
-  //       try {
-  //           const parsedJson = JSON.parse(jsonBalance);
-  //           console.log("Parsed Json:", parsedJson)
-  //           const innerJson = JSON.parse(parsedJson.ok);
-  //           console.log("Inner Json:", innerJson)
-  //           const hexBalance = innerJson.result;
-  //           console.log("Hex balance Json:", hexBalance)
-  //           const bigNumberValue = ethers.BigNumber.from(hexBalance);
-  //           const etherValue = ethers.utils.formatEther(bigNumberValue);
-  //           console.log("ethers value:", etherValue)
-  //           // return parseInt(etherValue, 16);
-  //       } catch (error) {
-  //           console.error("Error decoding balance:", error);
-  //           return 'N/A';
-  //       }
-  //   }
 
   // Reactive statement to auto-update when getBalanceValue changes
   $: {

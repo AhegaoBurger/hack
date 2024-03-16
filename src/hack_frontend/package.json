@@ -6,6 +6,7 @@
   "scripts": {
     "setup": "npm i && dfx canister create hack_backend && dfx generate hack_backend && dfx deploy",
     "start": "vite --port 3000",
+    "dev": "vite",
     "prebuild": "dfx generate",
     "build": "tsc && vite build",
     "format": "prettier --write \"src/**/*.{json,js,jsx,ts,tsx,css,scss}\""
@@ -14,9 +15,11 @@
     "@dfinity/agent": "^0.20.0",
     "@dfinity/candid": "^0.20.0",
     "@dfinity/principal": "^0.20.0",
-    "bits-ui": "^0.19.6",
+    "bits-ui": "^0.19.7",
     "clsx": "^2.1.0",
     "lucide-svelte": "^0.354.0",
+    "mode-watcher": "^0.3.0",
+    "svelte-sonner": "^0.3.18",
     "tailwind-merge": "^2.2.1",
     "tailwind-variants": "^0.2.0"
   },
