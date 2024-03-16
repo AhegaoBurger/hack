@@ -1,6 +1,5 @@
 import Time "mo:base/Time";
 import Result "mo:base/Result";
-import Nat64 "mo:base/Nat64";
 import Bool "mo:base/Bool";
 
 module {

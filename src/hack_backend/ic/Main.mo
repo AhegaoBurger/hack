@@ -10,8 +10,7 @@ import Proposal "Proposal";
 import Map "mo:map/Map";
 import Types "types";
 import Community "Community";
-import Buffer "mo:base/Buffer";
-
+import Vector "mo:vector";
 
 actor {
 
@@ -34,8 +33,8 @@ actor {
     //
     // State Variables
     //
-    let communities = Map.new<Nat, CommunityT>(); //stable map
-    let proposalsByCommunity = Map.new<Nat, Buffer.Buffer<ProposalT>>(); //stable map
+    stable let communities = Map.new<Nat, CommunityT>(); //stable map
+    stable let proposalsByCommunity = Map.new<Nat, Vector.Vector<ProposalT>>(); //stable map
 
 
     //
@@ -97,9 +96,12 @@ actor {
 
     // };
 
-    // public shared query func getAllProposalsByCmt() : async [CommunityT] {
-    //     return proposalsObj.getAllCommunities();
-    // };
+    public shared query func getAllProposalsByCmt(cmtID: Nat) : async Result<[ProposalT], Text> {
+        switch(proposalsObj.getAllProposalsByCmt(cmtID: Nat)) {
+            case(#err(msg)) { return #err(msg) };
+            case(#ok(list)) { return #ok(list) };
+        };
+    };
 
   
     //

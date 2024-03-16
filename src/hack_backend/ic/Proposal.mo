@@ -1,9 +1,10 @@
 import Types "types";
 import Map "mo:map/Map";
 import { nhash } "mo:map/Map";
-import Buffer "mo:base/Buffer";
 import Bool "mo:base/Bool";
 import Time "mo:base/Time";
+import Result "mo:base/Result";
+import Vector "mo:vector";
 
 
 module {
@@ -11,15 +12,14 @@ module {
     type Result<A, B> = Types.Result<A, B>;
     type ProposalT = Types.ProposalT;
 
-    public class Proposal(proposalsMap: Map.Map<Nat, Buffer.Buffer<ProposalT>>){
+    public class Proposal(proposalsMap: Map.Map<Nat, Vector.Vector<ProposalT>>){
 
         public func createProposal(cmtID: Nat, title: Text, description: Text, isTempCheck: Bool) : Result<ProposalT, Text> {
             
-            var list = Buffer.Buffer<ProposalT>(3);
+            var list = Vector.new<ProposalT>();
             var newProposalId = cmtID * 10000;
 
-
-            switch(Map.get<Nat, Buffer.Buffer<ProposalT>>(proposalsMap, nhash, cmtID)) {
+            switch(Map.get<Nat, Vector.Vector<ProposalT>>(proposalsMap, nhash, cmtID)) {
                 case(null) { 
                     // does nothing because is going to create a new list
                 };
@@ -30,7 +30,7 @@ module {
                     //newProposalID = 50_011 
                     //this creates a range of 99999 proposals per community
 
-                    let listSize = proposalsList.size();
+                    let listSize = Vector.size(proposalsList);
                     newProposalId += listSize;
 
                 };
@@ -47,13 +47,24 @@ module {
                 isTempCheck = isTempCheck;
             };
 
-            list.add(newProposal);
-            Map.set<Nat, Buffer.Buffer<ProposalT>>(proposalsMap, nhash, cmtID, list);
+            Vector.add(list, newProposal);
+            Map.set<Nat, Vector.Vector<ProposalT>>(proposalsMap, nhash, cmtID, list);
 
             return #ok(newProposal);
             
-        }
+        };
+
+        public func getAllProposalsByCmt(cmtID: Nat) : Result<[ProposalT], Text> {
+
+            switch(Map.get<Nat, Vector.Vector<ProposalT>>(proposalsMap, nhash, cmtID)) {
+                    case(null) { 
+                        return #err("Community not found");
+                    };
+                    case(? proposalsList) { 
+                        return #ok(Vector.toArray(proposalsList));
+                    };
+            }
+
+        };
     };
-
-
 };
