@@ -7,7 +7,8 @@ import Iter "mo:base/Iter";
 module {
 
     type Result<A, B> = Types.Result<A, B>;
-    type CommunityT = Types.Community;
+    type CommunityT = Types.CommunityT;
+    type ProposalT = Types.ProposalT;
 
     public class Community(communities: Map.Map<Nat, CommunityT>) {
 
@@ -42,6 +43,7 @@ module {
         public func getAllCommunities() : [CommunityT] {
             return Iter.toArray(Map.vals<Nat, CommunityT>(communities));
         };
+
        
     };
 };
