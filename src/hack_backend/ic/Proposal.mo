@@ -15,19 +15,19 @@ import Types "types";
 
 class Proposal(){
 
-    type Member = Types.Member;
-    type Result<Ok, Err> = Types.Result<Ok, Err>;
-    type HashMap<K, V> = Types.HashMap<K, V>;
-    type Proposal = Types.Proposal;
-    type ProposalContent = Types.ProposalContent;
-    type ProposalId = Types.ProposalId;
+    // type Member = Types.Member;
+    // type Result<Ok, Err> = Types.Result<Ok, Err>;
+    // type HashMap<K, V> = Types.HashMap<K, V>;
+    // type Proposal = Types.Proposal;
+    // type ProposalContent = Types.ProposalContent;
+    // type ProposalId = Types.ProposalId;
 
 
-    var nextProposalId : Nat64 = 0;
-    let proposals = HashMap.HashMap<ProposalId, Proposal>(0, Nat64.equal, Nat64.toNat32);
+    // var nextProposalId : Nat64 = 0;
+    // let proposals = HashMap.HashMap<ProposalId, Proposal>(0, Nat64.equal, Nat64.toNat32);
 
     
-    let members = HashMap.HashMap<Principal, Member>(0, Principal.equal, Principal.hash);
+    // let members = HashMap.HashMap<Principal, Member>(0, Principal.equal, Principal.hash);
 
 
     // public shared ({ caller }) func createProposal(content : ProposalContent) : async Result<ProposalId, Text> {
