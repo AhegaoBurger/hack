@@ -11,7 +11,7 @@
   import Button from "$lib/components/ui/button/button.svelte";
   import { onMount } from "svelte";
 
-  let proposals = [{title: "Reverse gravity", description: "I think it is self explanatory", address: "your_moms_house"}, {title: "Kill God", description: "I think it is self explanatory", address: "your_dads_house"}]
+  let proposals = [{title: "Reverse gravity", description: "We want to reverse gravity for the bettering of humanity and definitely not to sell expensive earth teathers", address: "0"}, {title: "Kill God", description: "I think it is self explanatory", address: "1"}]
 
   let canisterId = process.env.CANISTER_ID_HACK_FRONTEND
 
@@ -29,8 +29,15 @@
       name: item.name,
       address: item.smartContractAddr
     }))
+    
+    let community = communities.find(c => c.name === communityName);
 
-    const community = communities.find(c => c.name === communityName);
+    if (community) {
+      communityId = community.id;
+      console.log("CommunitId is", communityId)
+      await getAllProposalsByCmt(communityId); // Move proposal fetching here
+    }
+
     communityId = community.id
   }
 
@@ -38,19 +45,25 @@
       return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-  onMount(async () => {
-    getAllProposalsByCmt()
-  })
-
   async function getAllProposalsByCmt(communityId) {
-    await backend.getAllProposalsByCmt(communityId).then((response) => {
-      proposals = response.map((item) => ({
-        title: item.name,
-        description: item.description,
-        address: item.id
-      }));
-    })
+    if (!communityId) return; // Check if communityId is available
+    const response = await backend.getAllProposalsByCmt(communityId);
+    console.log("The response is ", response)
+    proposals = response.map(item => ({
+      title: item.name,
+      description: item.description,
+      address: item.id // Make sure 'item' has 'name', 'description', 'id'
+    }));
+
+    console.log("The proposals in the functions are", proposals)
   }
+
+  onMount(() => {
+    fetchCommunityId()
+    // getAllProposalsByCmt(communityId)
+    console.log("communityId is ", communityId)
+    console.log("The proposals are ", proposals)
+  })
 
 </script>
 
@@ -65,11 +78,11 @@
         <Card.Description>An endless odyssey of fun</Card.Description>
       </Card.Header>
       <Card.Content>
-        Name of the community
+        We are here to have fun and make decisions
         <!-- {JSON.stringify(testRPCValue)} -->
       </Card.Content>
       <Card.Footer class="flex justify-between">
-        <Button>Press me to see the truth</Button>
+        <Button>You look good today</Button>
       </Card.Footer>
   </Card.Root>
 
@@ -78,10 +91,10 @@
   </div>
 
   <div>
-    <section class="flex">
+    <section class="cols-4">
       {#each proposals as proposal}
         <a href="{communityName}/proposal/{proposal.address}">
-          <Card.Root class="w m-4">
+          <Card.Root class="w-1/2 m-4">
             <Card.Header>
               <Card.Description>{proposal.address}</Card.Description>
               <div></div>

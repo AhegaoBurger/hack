@@ -8,7 +8,7 @@
     import * as Card from "$lib/components/ui/card/index"
     import { Button } from '$lib/components/ui/button'
 
-    let proposal = {title: "Reverse gravity", description: "I think it is self explanatory", address: "your_moms_house"}
+    let proposal = {title: "Reverse gravity", description: "We want to reverse gravity for the bettering of humanity and definitely not to sell expensive earth teathers", address: "0"}
 
     async function getProposal() {
         backend.getProposal().then((response) => {
@@ -23,7 +23,7 @@
     {proposal.description}
 </div>
 
-<h1>{contractAddress}</h1>
+<!-- <h1>{contractAddress}</h1> -->
 
 
 <Card.Root class="w-full m-4">

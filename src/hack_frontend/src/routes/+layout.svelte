@@ -11,11 +11,18 @@
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.ts"; 
 	import * as Avatar from "$lib/components/ui/avatar/index.ts";
 	import * as Card from "$lib/components/ui/card/index"
+	import { Badge } from '$lib/components/ui/badge/index'
+	import { Separator } from '$lib/components/ui/separator/index'
 	import { Toaster } from "svelte-sonner";
 
 	import { onMount } from "svelte";
 
 	import { ethers } from 'ethers';
+
+	import { createAvatar } from '@dicebear/avatars';
+  	import * as style from '@dicebear/avatars-identicon-sprites';
+
+	let svg;
 
 	let communities;
 
@@ -39,6 +46,11 @@
 		}));
 
 		communities = await getAllCommunities()
+
+		svg = createAvatar(style, {
+			seed: 'your-custom-seed', // Use a unique identifier here
+			// any other options
+		});
     });
 
     // function handleAuth() {
@@ -76,7 +88,7 @@
 
 	async function getAllCommunities() {
 		const response = await backend.getAllCommunities(); // Make sure this is awaited
-		console.log("The communites are ", response)
+		// console.log("The communites are ", response)
 		return response.map(item => ({
 			name: item.name,
 			address: item.smartContractAddr
@@ -92,6 +104,15 @@
     let isConnected = false;
 
 	let canisterId = process.env.CANISTER_ID_HACK_FRONTEND
+
+	function abbreviateAddress(address, charsToShow = 4) {
+		if (!address || address.length < charsToShow * 2) {
+		return address;
+		}
+		const start = address.substring(0, charsToShow);
+		const end = address.substring(address.length - charsToShow);
+		return `${start}...${end}`;
+	}
 
 	async function connectWallet() {
         if (window.ethereum) {
@@ -131,6 +152,7 @@
 	<sidebar class="border-r">
 		<div class="w-16 flex flex-col items-center py-4 space-y-4">
 			<!-- Icons or logo -->
+			<img src="/logo.png" alt="">
 			<!-- Navigation Icons -->
 			<div class="flex flex-col space-y-2">
 				<!-- Replace with your actual icons -->
@@ -141,6 +163,7 @@
 				{:else}
 					<div></div>
 				{/if}					
+				<Separator />
 				<!-- <a href="/" class="p-2 hover:bg-gray-700 rounded-md"><img src="/favicon.ico" alt="Dashboard" class="w-6 h-6"></a>
 				<a href="/" class="p-2 hover:bg-gray-700 rounded-md"><img src="/favicon.ico" alt="Dashboard" class="w-6 h-6"></a> -->
 				<a href="/setup" class="p-2 hover:bg-gray-700 rounded-md"><img src="/plus-solid.svg" alt="Dashboard" class="w-6 h-6"></a>
@@ -150,7 +173,6 @@
 	</sidebar>
 
 	<section class="w-full">
-
 		<div class="hidden flex-col md:flex">
 			<!-- Main Content -->
 			<div class="border-b">
@@ -166,7 +188,7 @@
 								Overview
 							</a>
 		
-							<a
+							<!-- <a
 								href="/faq"
 								class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 							>
@@ -177,18 +199,29 @@
 								class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 							>
 								Reports
-							</a>
+							</a> -->
 						</nav>
 		
 						<div class="ml-auto flex items-center space-x-4">
 							<!-- {#if $auth.loggedIn} -->
-								<div>Wallet Balance: {balance} ETH</div>
+								<!-- <div>Wallet Balance: {balance} ETH</div> -->
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger asChild let:builder>
 										<Button variant="ghost" builders={[builder]} class="relative h-8 w-8 rounded-full">
-											<Avatar.Root class="h-8 w-8">
+											<!-- <Badge class="w-10 h-5">
+												{#if MetaMaskAdress}
+													{abbreviateAddress(MetaMaskAdress)}
+												{:else}
+													A
+												{/if}
+											</Badge> -->
+											<Avatar.Root class="h-8">
 												<Avatar.Fallback>
-													AS
+													<!-- {#if MetaMaskAdress}
+														{abbreviateAddress(MetaMaskAdress)}
+													{:else} -->
+														A
+													<!-- {/if} -->
 												</Avatar.Fallback>
 											</Avatar.Root>
 										</Button>
@@ -198,15 +231,17 @@
 											<div class="flex flex-col space-y-1">
 												<p class="text-sm font-medium leading-none">
 													{#if MetaMaskAdress}
-														{MetaMaskAdress}
+														{abbreviateAddress(MetaMaskAdress)}
+													{:else}
+														A
 													{/if}
-													Name and Surname
+													<!-- Name and Surname -->
 												</p>
 												<p class="text-xs leading-none text-muted-foreground">
-													{#if MetaMaskAdress}
+													<!-- {#if MetaMaskAdress}
 														{MetaMaskAdress}
 													{/if}
-													Name
+													Name -->
 												</p>
 											</div>
 										</DropdownMenu.Label>
@@ -238,9 +273,11 @@
 								</DropdownMenu.Root>
 
 
-								{#if isConnected}
-								<Button on:click={connectWallet}>Connect Wallet</Button>
-								{/if}
+								<!-- {#if isConnected === false} -->
+									<Button on:click={connectWallet} disabled={isConnected}>Connect Wallet</Button>
+								<!-- {:else}
+
+								{/if} -->
 							<!-- {:else}
 								<Button on:click={login}>Log in</Button>
 							{/if} -->
