@@ -1,6 +1,6 @@
 <script>
-  /** @type {import('./$types').LayoutData} */
-	export let data;
+  // /** @type {import('./$types').LayoutData} */
+	// export let data;
 
   import { backend } from "$lib/canisters";
 
@@ -14,7 +14,11 @@
 
   let canisterId = process.env.CANISTER_ID_HACK_FRONTEND
 
-  let communityName = $page.params.community
+  $: communityName = $page.params.community
+
+  function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+  }
 
 </script>
 
@@ -22,37 +26,44 @@
   <a href="/proposals/{url}">{url}</a>
 {/each} -->
 
-<Card.Root class="w-full m-4">
-    <Card.Header>
-      <Card.Title>{communityName}'s community</Card.Title>
-      <Card.Description>An endless odyssey of fun</Card.Description>
-    </Card.Header>
-    <Card.Content>
-      Name of the community
-      <!-- {JSON.stringify(testRPCValue)} -->
-    </Card.Content>
-    <Card.Footer class="flex justify-between">
-      <Button>Press me to see the truth</Button>
-    </Card.Footer>
-</Card.Root>
+<main class="relative">
+  <Card.Root class="w-full m-4">
+      <Card.Header>
+        <Card.Title>{capitalizeFirstLetter(communityName)}'s community</Card.Title>
+        <Card.Description>An endless odyssey of fun</Card.Description>
+      </Card.Header>
+      <Card.Content>
+        Name of the community
+        <!-- {JSON.stringify(testRPCValue)} -->
+      </Card.Content>
+      <Card.Footer class="flex justify-between">
+        <Button>Press me to see the truth</Button>
+      </Card.Footer>
+  </Card.Root>
 
-<section class="flex">
+  <div class="static">
+    <a href="/{communityName}/create"><Button class="absolute insety-y-0 right-0" variant='outline'>New Proposal</Button></a>
+  </div>
 
-  {#each proposals as proposal}
-    <a href="{data.url}/proposal/{proposal.address}">
-      <Card.Root class="w m-4">
-        <Card.Header>
-          <Card.Description>{proposal.address}</Card.Description>
-          <div></div>
-          <Card.Title tag="h3">{proposal.title}</Card.Title>
-        </Card.Header>
-        <Card.Content>
-                <p>{proposal.description}</p>
-        </Card.Content>
-        <Card.Footer class="flex justify-between">
-          <Button>Press me to see the truth</Button>
-        </Card.Footer>
-      </Card.Root>
-    </a>
-  {/each}
-</section>
+  <div>
+    <section class="flex">
+      {#each proposals as proposal}
+        <a href="{communityName}/proposal/{proposal.address}">
+          <Card.Root class="w m-4">
+            <Card.Header>
+              <Card.Description>{proposal.address}</Card.Description>
+              <div></div>
+              <Card.Title tag="h3">{proposal.title}</Card.Title>
+            </Card.Header>
+            <Card.Content>
+                    <p>{proposal.description}</p>
+            </Card.Content>
+            <Card.Footer class="flex justify-between">
+              <Button>Press me to see the truth</Button>
+            </Card.Footer>
+          </Card.Root>
+        </a>
+      {/each}
+    </section>
+  </div>
+</main>

@@ -3,6 +3,8 @@
 
     import { onMount } from "svelte";
 
+    import { page } from '$app/stores'
+
     import * as Card from "$lib/components/ui/card/index"
     import { Button } from '$lib/components/ui/button'
 
@@ -13,11 +15,15 @@
 
         })
     }
+
+    $: contractAddress = $page.params.contract
 </script>
 
 <div class="font-sans m-4">
     {proposal.description}
 </div>
+
+<h1>{contractAddress}</h1>
 
 
 <Card.Root class="w-full m-4">

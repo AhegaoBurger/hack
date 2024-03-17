@@ -2,6 +2,9 @@
 <script>
     import "../app.pcss";
 
+	// import { AuthClient } from "@dfinity/auth-client";
+	// import { auth, createActor } from "../store/auth";
+
 	import { backend } from "$lib/canisters";
 
     import Button from "$lib/components/ui/button/button.svelte";
@@ -14,13 +17,20 @@
 
 	import { ethers } from 'ethers';
 
-	export let data;
-
 	let communities;
 
-	onMount(async() => {
-		// const response = data.communities;
-		// const data = JSON.parse(response); // Assuming 'response' is a JSON string. Adjust as necessary.
+	export let data;
+
+	// /** @type {AuthClient} */
+    // let client;
+
+    // let whoami = $auth.actor.whoami();
+
+    onMount(async () => {
+        // client = await AuthClient.create();
+        // if (await client.isAuthenticated()) {
+        // handleAuth();
+        // }
 
 		// Now, map the data to fit your 'communities' structure
 		communities = data.communities.map((item) => ({
@@ -29,7 +39,40 @@
 		}));
 
 		communities = await getAllCommunities()
-	})
+    });
+
+    // function handleAuth() {
+    //     auth.update(() => ({
+    //     loggedIn: true,
+    //     actor: createActor({
+    //         agentOptions: {
+    //         identity: client.getIdentity(),
+    //         },
+    //     }),
+    //     }));
+
+    //     whoami = $auth.actor.whoami();
+    // }
+
+    // function login() {
+    //     client.login({
+    //     identityProvider:
+    //         process.env.DFX_NETWORK === "ic"
+    //         ? "https://identity.ic0.app/#authorize"
+    //         : `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943/#authorize`,
+    //     onSuccess: handleAuth,
+    //     });
+    // }
+
+    // async function logout() {
+    //     await client.logout();
+    //     auth.update(() => ({
+    //     loggedIn: false,
+    //     actor: createActor(),
+    //     }));
+
+    //     whoami = $auth.actor.whoami();
+    // }
 
 	async function getAllCommunities() {
 		const response = await backend.getAllCommunities(); // Make sure this is awaited
@@ -111,8 +154,8 @@
 		<div class="hidden flex-col md:flex">
 			<!-- Main Content -->
 			<div class="border-b">
-				<div class="flex-grow">
-					<div class="max-w-7xl py-6 sm:px-6 lg:px-8">
+				<div class="flex h-16 items-center px-4">
+					<!-- <div class="max-w-7xl py-6 sm:px-6 lg:px-8"> -->
 						<!-- Your content here -->
 						<nav class="flex items-center space-x-4 lg:space-x-6">
 							<a 
@@ -138,7 +181,8 @@
 						</nav>
 		
 						<div class="ml-auto flex items-center space-x-4">
-							<div>Wallet Balance: {balance} ETH</div>
+							<!-- {#if $auth.loggedIn} -->
+								<div>Wallet Balance: {balance} ETH</div>
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger asChild let:builder>
 										<Button variant="ghost" builders={[builder]} class="relative h-8 w-8 rounded-full">
@@ -182,16 +226,26 @@
 											</DropdownMenu.Item>
 										</DropdownMenu.Group>
 										<DropdownMenu.Separator />
-										<DropdownMenu.Item on:click>
+										<DropdownMenu.Item>
 											Log out
 											<DropdownMenu.Shortcut>⇧⌘Q</DropdownMenu.Shortcut>
 										</DropdownMenu.Item>
+										<!-- <DropdownMenu.Item on:click={logout}>
+											Log out
+											<DropdownMenu.Shortcut>⇧⌘Q</DropdownMenu.Shortcut>
+										</DropdownMenu.Item> -->
 									</DropdownMenu.Content>
 								</DropdownMenu.Root>
-		
-								<Button on:click={connectWallet} disabled={isConnected}>Connect Wallet</Button>
+
+
+								{#if isConnected}
+								<Button on:click={connectWallet}>Connect Wallet</Button>
+								{/if}
+							<!-- {:else}
+								<Button on:click={login}>Log in</Button>
+							{/if} -->
 						</div>
-					</div>
+					<!-- </div> -->
 				</div>
 			</div>
 		</div>		
