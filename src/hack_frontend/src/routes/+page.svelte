@@ -39,18 +39,18 @@
   function decodeBalance(jsonBalance) {
     try {
       const parsedJson = JSON.parse(jsonBalance);
-      console.log("Parsed Json:", parsedJson)
+      // console.log("Parsed Json:", parsedJson)
       const innerJson = JSON.parse(parsedJson.ok);
-      console.log("Inner Json:", innerJson)
+      // console.log("Inner Json:", innerJson)
       const hexBalance = innerJson.result;
-      console.log("Hex balance Json:", hexBalance)
+      // console.log("Hex balance Json:", hexBalance)
       const bigNumberValue = ethers.BigNumber.from(hexBalance);
-      console.log("Big Number value: ", bigNumberValue)
+      // console.log("Big Number value: ", bigNumberValue)
       const etherValue = ethers.utils.formatEther(bigNumberValue);
-      console.log("Balance in ETH:", etherValue)
+      // console.log("Balance in ETH:", etherValue)
       testRPCValue = `Balance in ETH: ${etherValue}`; // Update the UI with the decoded value
     } catch (error) {
-      console.error("Error decoding balance:", error);
+      // console.error("Error decoding balance:", error);
       testRPCValue = 'Error decoding balance';
     }
   }
