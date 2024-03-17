@@ -20,6 +20,7 @@ module {
         created : Time.Time;
         executed : ?Time.Time; 
         voteScore : Int; // A score based on the votes
+        votes: [Vote];
         status : ProposalStatus; 
         isTempCheck : Bool;
     };
@@ -37,6 +38,17 @@ module {
         weiAmount: Nat;
     };
 
+    public type VoteType = {
+        #Yes;
+        #No;
+    };
+
+    public type Vote = {
+        member: Principal;
+        vote: VoteType;
+        votingPower: Int;
+    };
+
     //
     // Community
     //
@@ -44,7 +56,18 @@ module {
         id : Nat;
         name : Text;
         smartContractAddr : Text;
+        admin : Principal;
+        members: [MemberT];
     };
+
+    //
+    // Eth
+    //
+    public type GetBalanceResponse = {
+        id : Nat;
+        jsonrpc : Text;
+        result: Text
+    }
 
 
     // //

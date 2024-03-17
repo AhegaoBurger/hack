@@ -5,6 +5,8 @@ import Nat "mo:base/Nat";
 import Text "mo:base/Text";
 import EvmRpc "../lib/Evm_rpc";
 import Cycles "mo:base/ExperimentalCycles";
+import Debug "mo:base/Debug";
+import Nat8 "mo:base/Nat8";
 import Proposal "Proposal";
 import Map "mo:map/Map";
 import Types "Types";
@@ -12,6 +14,12 @@ import Community "Community";
 import Vector "mo:vector";
 import HandleError "utilities/HandleError";
 import MemberState "MemberState";
+import JsonConverter "utilities/JsonConverter";
+import Hex "utilities/Hex";
+import Binary "utilities/Binary";
+import { nhash } "mo:map/Map";
+
+
 
 actor {
 
@@ -25,7 +33,6 @@ actor {
     type CommunityT = Types.CommunityT;
     type MemberT = Types.MemberT;
     type RequestResult = EvmRpc.RequestResult;
-
     //
     // Canisters
     //
@@ -55,8 +62,7 @@ actor {
     let apiKey = "NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss/";
     let url = networkLink # apiKey;
 
-    let maxbytes : Nat64 = 5000;
-
+    let maxbytes : Nat64 = 1000;
 
     //
     // Member
@@ -74,9 +80,26 @@ actor {
         switch(await getBalance(walletAddress)) {
             case(#ok(responseJSON)) { 
                 
-                //TO DO - get the tokens amount - decode from hex
+                //get the tokens amount
+                switch(JsonConverter.toGetBalanceResponse(responseJSON)) {
+                    case(#err(msg)) { return #err(msg) };
+                    case(#ok(responseJson)) { 
+                        Debug.print(responseJson.result);
 
-                let weiAmount = (1 ** 18); //harcoded for now - in wei
+                        //not working
+                        // switch(Hex.decode(responseJson.result)) {
+                        //     case(#ok(array)) {
+                        //         Debug.print(Nat64.toText(Binary.BigEndian.toNat64(array)));
+                        //     };
+                        //     case(#err(_)) { Debug.print("error converting to binary")};
+                        // };
+                    };
+                };
+
+                //TO DO convert hex to decimal
+                
+                let weiAmount = 10 ** 15 + 7 ** 13; //harcoded for now - in wei
+                Debug.print(Nat.toText(weiAmount));
                 
                 switch(membersObj.login(caller, walletAddress, weiAmount)) {
                     case(#ok(member)) { return #ok("User " # Principal.toText(member.id) # " logged in") };
@@ -91,6 +114,7 @@ actor {
 
     };
 
+    //text because it might be called by the frontend
     public shared func getMember(memberID: Text) : async Result<MemberT, Text> {
         return membersObj.getMember(Principal.fromText(memberID));
     };
@@ -104,9 +128,14 @@ actor {
     - should check if the caller is the owner of the contract (not done)
     - should check if already exists a community with that contract (not done)
     */
-    public shared func createCommunity(smartContractAddr: Text, name: Text) : async Result<CommunityT, Text> {
-        switch(cmtObj.createCommunity(smartContractAddr, name)) {
-            case(#ok(cmt)) { return #ok(cmt) };
+    public shared ({caller}) func createCommunity(smartContractAddr: Text, name: Text) : async Result<CommunityT, Text> {
+
+        switch(cmtObj.createCommunity(caller, smartContractAddr, name)) {
+            case(#ok(cmt)) { 
+                let list = Vector.new<ProposalT>();
+                Map.set<Nat, Vector.Vector<ProposalT>>(proposalsByCommunity, nhash, cmt.id, list);
+                return #ok(cmt)
+            };
             case(#err(error)) { return #err(error) };
         }; 
     };
@@ -120,6 +149,17 @@ actor {
 
     public shared query func getAllCommunities() : async [CommunityT] {
         return cmtObj.getAllCommunities();
+    };
+
+    public shared ({ caller }) func joinCommunity(cmtID: Nat) : async Result<CommunityT, Text> {
+    
+        switch(membersObj.getMember(caller)) {
+            case(#err(msg)) { return #err(msg) };
+            case(#ok(member)) {
+                cmtObj.joinCommunity(cmtID, member);
+            };
+        };
+
     };
     
     //
@@ -139,19 +179,31 @@ actor {
         
     };
 
-    // public shared query func getProposalByCmt(id: Nat) : async Result<CommunityT, Text> {
-    //     switch(proposalsObj.getCommunity(id)) {
-    //         case(#ok(cmt)) { return #ok(cmt) };
-    //         case(#err(error)) { return #err(error) };
-    //     };
-
-    // };
-
     public shared query func getAllProposalsByCmt(cmtID: Nat) : async Result<[ProposalT], Text> {
         switch(proposalsObj.getAllProposalsByCmt(cmtID: Nat)) {
             case(#err(msg)) { return #err(msg) };
             case(#ok(list)) { return #ok(list) };
         };
+    };
+
+    public shared ({caller}) func voteProposalByCmt(cmtID: Nat, proposalID: Nat, vote: Bool) : async Result<ProposalT, Text> {
+
+        
+        switch(await getCommunity(cmtID)) {
+            case(#ok(cmt)) { 
+
+                switch(membersObj.getMember(caller)) {
+                    case(#err(msg)) { return #err(msg) };
+                    case(#ok(member)) {
+                        return proposalsObj.voteProposalByCmt(cmt, proposalID, member, vote);
+                    };
+                };
+
+
+            };
+            case(#err(msg)) { return #err(msg)};
+        };
+
     };
 
   
@@ -164,33 +216,6 @@ actor {
 
         let customRPCapi : EvmRpc.RpcApi = {
                 url = url;
-                headers = null;
-        };
-
-        let rpcService : EvmRpc.RpcService = #Custom(customRPCapi);
-
-        Cycles.add(30_000_000_000_000);
-
-        let res : RequestResult = await evmRPC.request(rpcService, payload, maxbytes);
-        switch(res) {
-                case(#Err(error)) { 
-                        return(#err(HandleError.handleError(error)));
-                };
-                case(#Ok(msg)) { 
-                    return #ok(msg);
-                };
-        }; 
-    };
-
-    //change to receive an address
-    public shared func getContractMetadata() : async Result<Text, Text> {
-        // /getContractMetadata?contractAddress=0xe785E82358879F061BC3dcAC6f0444462D4b5330'
-
-        let newUrl = "https://eth-mainnet.g.alchemy.com/nft/v2/NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss/getContractMetadata?contractAddress=0xe785E82358879F061BC3dcAC6f0444462D4b5330";
-        let payload : Text = "{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"alchemy_getTokenMetadata\",\"params\":[\"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48\"]}";
-
-        let customRPCapi : EvmRpc.RpcApi = {
-                url = newUrl;
                 headers = null;
         };
 
