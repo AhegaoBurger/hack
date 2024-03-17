@@ -14,27 +14,35 @@
 
 	import { ethers } from 'ethers';
 
-	let communities;
-
 	export let data;
 
-	// let communities = [{name: "hack", address: "test"}, {name: "artur", address: "done"}];
+	let communities;
 
 	onMount(async() => {
-		try {
-			const response = data.communities;
-			const data = JSON.parse(response); // Assuming 'response' is a JSON string. Adjust as necessary.
+		// const response = data.communities;
+		// const data = JSON.parse(response); // Assuming 'response' is a JSON string. Adjust as necessary.
 
-            // Now, map the data to fit your 'communities' structure
-            communities = data.map((item) => ({
-                name: item.name,
-                address: item.smartContractAddr
-            }));
-		} catch (error) {
-			console.error("Failed to load communities:", error);
-		}
-		
+		// Now, map the data to fit your 'communities' structure
+		communities = data.communities.map((item) => ({
+			name: item.name,
+			address: item.smartContractAddr
+		}));
+
+		communities = await getAllCommunities()
 	})
+
+	async function getAllCommunities() {
+		const response = await backend.getAllCommunities(); // Make sure this is awaited
+		console.log("The communites are ", response)
+		return response.map(item => ({
+			name: item.name,
+			address: item.smartContractAddr
+		}));
+	}
+
+	console.log("After all the ops the communities are ", communities)
+
+	// let communities = [{name: "hack", address: "test"}, {name: "artur", address: "done"}];
 
 	let balance = 'N/A';
 	let MetaMaskAdress;
@@ -48,10 +56,10 @@
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 const signer = provider.getSigner();
-				console.log("The signer is: ", signer)
+				// console.log("The signer is: ", signer)
                 const address = await signer.getAddress();
 				MetaMaskAdress = address;
-				console.log("The adress is: ", address)
+				// console.log("The adress is: ", address)
                 await updateBalance(address);
                 isConnected = true;
             } catch (error) {
@@ -85,12 +93,14 @@
 				<!-- Replace with your actual icons -->
 				{#if communities}
 					{#each communities as community }
-						<a href="/{community.name}?canisterId={canisterId}" class="p-2 hover:bg-gray-700 rounded-md"><img src="/favicon.ico" alt="" class="w-6 h-6"></a>
+						<a href="/{community.name}" class="p-2 hover:bg-gray-700 rounded-md"><img src="/favicon.ico" alt="" class="w-6 h-6"></a>
 					{/each}
+				{:else}
+					<div></div>
 				{/if}					
 				<!-- <a href="/" class="p-2 hover:bg-gray-700 rounded-md"><img src="/favicon.ico" alt="Dashboard" class="w-6 h-6"></a>
 				<a href="/" class="p-2 hover:bg-gray-700 rounded-md"><img src="/favicon.ico" alt="Dashboard" class="w-6 h-6"></a> -->
-				<a href="/setup?canisterId={canisterId}" class="p-2 hover:bg-gray-700 rounded-md"><img src="/plus-solid.svg" alt="Dashboard" class="w-6 h-6"></a>
+				<a href="/setup" class="p-2 hover:bg-gray-700 rounded-md"><img src="/plus-solid.svg" alt="Dashboard" class="w-6 h-6"></a>
 				<!-- Add more navigation items here -->
 			</div>
 		</div>
@@ -106,7 +116,7 @@
 						<!-- Your content here -->
 						<nav class="flex items-center space-x-4 lg:space-x-6">
 							<a 
-								href='/?canisterId={canisterId}'
+								href='/'
 								class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 							>
 								
@@ -114,13 +124,13 @@
 							</a>
 		
 							<a
-								href="/faq?canisterId={canisterId}"
+								href="/faq"
 								class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 							>
 								FAQ
 							</a>
 							<a
-								href="/about?canisterId={canisterId}"
+								href="/about"
 								class="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
 							>
 								Reports

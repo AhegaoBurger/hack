@@ -4,8 +4,6 @@
 
   import { backend } from "$lib/canisters";
 
-  import { page } from '$app/stores'
-
   import * as Avatar from "$lib/components/ui/avatar/index.ts";
 	import * as Card from "$lib/components/ui/card/index"
   import Button from "$lib/components/ui/button/button.svelte";
@@ -13,8 +11,6 @@
   let proposals = [{title: "Reverse gravity", description: "I think it is self explanatory", address: "your_moms_house"}, {title: "Kill God", description: "I think it is self explanatory", address: "your_dads_house"}]
 
   let canisterId = process.env.CANISTER_ID_HACK_FRONTEND
-
-  let communityName = $page.params.community
 
 </script>
 
@@ -24,7 +20,7 @@
 
 <Card.Root class="w-full m-4">
     <Card.Header>
-      <Card.Title>{communityName}'s community</Card.Title>
+      <Card.Title>Artur's community</Card.Title>
       <Card.Description>An endless odyssey of fun</Card.Description>
     </Card.Header>
     <Card.Content>

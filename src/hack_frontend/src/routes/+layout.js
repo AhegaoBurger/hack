@@ -1,27 +1,25 @@
-export const prerender = true;
+// src/hack_frontend/src/routes/+layout.js
+/** @type {import('./$types').PageLoad} */
 
 import { backend } from '$lib/canisters'
 
-async function getAllCommunities() {
-    try {
-        const response = backend.getAllCommunities();
-        const data = JSON.parse(response); // Assuming 'response' is a JSON string. Adjust as necessary.
+// // Modified getAllCommunities to return data
+// async function getAllCommunities() {
+//     const response = await backend.getAllCommunities(); // Make sure this is awaited
+//     return response.map(item => ({
+//         name: item.name,
+//         address: item.smartContractAddr
+//     }));
+// }
 
-        // Now, map the data to fit your 'communities' structure
-        return communities = data.map((item) => ({
-            name: item.name,
-            address: item.smartContractAddr
-        }));
-    } catch (error) {
-        console.error("Failed to load communities:", error);
-        return error;
-    }
-}
-    
- 
-/** @type {import('./$types').PageLoad} */
+let communities = [{name: "hack", address: "test"}, {name: "artur", address: "done"}]
+
 export async function load() {
+    // const communities = await getAllCommunities(); // Fetch communities asynchronously
     return {
-        communities: await getAllCommunities()
+        communities
+
     }
 }
+
+export const prerender = 'auto';
