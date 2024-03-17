@@ -9,6 +9,7 @@
   import * as Avatar from "$lib/components/ui/avatar/index.ts";
 	import * as Card from "$lib/components/ui/card/index"
   import Button from "$lib/components/ui/button/button.svelte";
+  import { onMount } from "svelte";
 
   let proposals = [{title: "Reverse gravity", description: "I think it is self explanatory", address: "your_moms_house"}, {title: "Kill God", description: "I think it is self explanatory", address: "your_dads_house"}]
 
@@ -16,8 +17,39 @@
 
   $: communityName = $page.params.community
 
+  let communityId;
+
+  // Function to fetch community ID
+  async function fetchCommunityId() {
+    const response = await backend.getAllCommunities();
+    let communities = response.map((item) => ({
+      id: item.id,
+      members: item.members,
+      admin: item.admin,
+      name: item.name,
+      address: item.smartContractAddr
+    }))
+
+    const community = communities.find(c => c.name === communityName);
+    communityId = community.id
+  }
+
   function capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
+  onMount(async () => {
+    getAllProposalsByCmt()
+  })
+
+  async function getAllProposalsByCmt(communityId) {
+    await backend.getAllProposalsByCmt(communityId).then((response) => {
+      proposals = response.map((item) => ({
+        title: item.name,
+        description: item.description,
+        address: item.id
+      }));
+    })
   }
 
 </script>
