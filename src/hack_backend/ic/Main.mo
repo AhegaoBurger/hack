@@ -5,16 +5,17 @@ import Nat "mo:base/Nat";
 import Text "mo:base/Text";
 import EvmRpc "../lib/Evm_rpc";
 import Cycles "mo:base/ExperimentalCycles";
-import Nat16 "mo:base/Nat16";
 import Proposal "Proposal";
 import Map "mo:map/Map";
-import Types "types";
+import Types "Types";
 import Community "Community";
 import Vector "mo:vector";
+import HandleError "utilities/HandleError";
+import MemberState "MemberState";
 
 actor {
 
-    Cycles.add(100000000000);
+    Cycles.add(30_000_000_000_000);
 
     //
     // TYPES
@@ -22,6 +23,8 @@ actor {
     type Result<A, B> = Types.Result<A, B>;
     type ProposalT = Types.ProposalT;
     type CommunityT = Types.CommunityT;
+    type MemberT = Types.MemberT;
+    type RequestResult = EvmRpc.RequestResult;
 
     //
     // Canisters
@@ -35,14 +38,62 @@ actor {
     //
     stable let communities = Map.new<Nat, CommunityT>(); //stable map
     stable let proposalsByCommunity = Map.new<Nat, Vector.Vector<ProposalT>>(); //stable map
-
+    stable let members = Map.new<Principal, MemberT>();
 
     //
     // Class Objects
     //
     let cmtObj = Community.Community(communities);
     let proposalsObj = Proposal.Proposal(proposalsByCommunity);
+    let membersObj = MemberState.MemberState(members);
 
+
+    //
+    // EVM RPC variables
+    //
+    let networkLink = "https://eth-mainnet.g.alchemy.com/v2/";
+    let apiKey = "NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss/";
+    let url = networkLink # apiKey;
+
+    let maxbytes : Nat64 = 5000;
+
+
+    //
+    // Member
+    //
+    public shared ({caller}) func login(icID: Text, walletAddress: Text) : async Result<Text, Text> {
+        
+        //a malicious user cannot says that is another user
+        //but is still able to use walletAddress from another user
+        if (caller != Principal.fromText(icID)) {
+            return #err("Caller is not the same has the IC provided");
+        };
+
+        //this call is called to verify the amount of tokens of the wallet address
+        //but the walletAddress is not being validated
+        switch(await getBalance(walletAddress)) {
+            case(#ok(responseJSON)) { 
+                
+                //TO DO - get the tokens amount - decode from hex
+
+                let weiAmount = (1 ** 18); //harcoded for now - in wei
+                
+                switch(membersObj.login(caller, walletAddress, weiAmount)) {
+                    case(#ok(member)) { return #ok("User " # Principal.toText(member.id) # " logged in") };
+                    case(#err(errorMsg)) { return #err(errorMsg) };
+                };
+
+            };
+            case(#err(errorMsg)) { 
+                return #err(errorMsg);
+            };
+        }; 
+
+    };
+
+    public shared func getMember(memberID: Text) : async Result<MemberT, Text> {
+        return membersObj.getMember(Principal.fromText(memberID));
+    };
 
     //
     // Community
@@ -107,10 +158,9 @@ actor {
     //
     // Ethereum integration
     //
-    public shared func getBalanceTokens() : async Result<Text, Text> {
-        let url : Text = "https://eth-mainnet.g.alchemy.com/v2/NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss";
-        let payload : Text = "{\"id\":1,\"jsonrpc\":\"2.0\",\"params\":[\"0x0d7322ca364B01A7b6749BC50786D9b3f9340B04\",\"latest\"],\"method\":\"eth_getBalance\"}";
-        let maxbytes : Nat64 = 2000;
+    public shared func getBalance(walletAddress: Text) : async Result<Text, Text> {
+        // 0x0d7322ca364B01A7b6749BC50786D9b3f9340B04
+        let payload : Text = "{\"id\":1,\"jsonrpc\":\"2.0\",\"params\":[\"" # walletAddress # "\",\"latest\"],\"method\":\"eth_getBalance\"}";
 
         let customRPCapi : EvmRpc.RpcApi = {
                 url = url;
@@ -121,44 +171,10 @@ actor {
 
         Cycles.add(30_000_000_000_000);
 
-        switch(await evmRPC.request(rpcService, payload, maxbytes)) {
-                
+        let res : RequestResult = await evmRPC.request(rpcService, payload, maxbytes);
+        switch(res) {
                 case(#Err(error)) { 
-                        switch(error) {
-                                case(#JsonRpcError(msg)) { return #err("JsonRpcError: " # msg.message) };
-                                case(#ProviderError(msg)) { 
-                                    switch(msg) {
-                                            case(#TooFewCycles(fewCyclesError)) { return #err("expected: " # Nat.toText(fewCyclesError.expected) # " received: " # Nat.toText(fewCyclesError.received))  };
-                                            case(#MissingRequiredProvider(errorMessage)) { return #err("MissingRequiredProvider") };
-                                            case(#ProviderNotFound(errorMessage)) {return #err("ProviderNotFound") };
-                                            case(#NoPermission(errorMessage)) {return #err("NoPermission") };
-                                    };
-                                };
-                                case(#ValidationError(msg)) { return #err("ValidationError")};
-                                case(#HttpOutcallError(httpError)) { 
-                                    switch(httpError) {
-                                      case(#IcError(icError)) { 
-
-                                          var errorCode : Text = "";
-                                          switch(icError.code) {
-                                            case(#NoError(_)) { errorCode := "NoError" };
-                                            case(#CanisterError(_)) {errorCode := "CanisterError" };
-                                            case(#SysTransient(_)) {errorCode := "SysTransient" };
-                                            case(#DestinationInvalid(_)) {errorCode := "DestinationInvalid" };
-                                            case(#Unknown(_)) {errorCode := "Unknown" };
-                                            case(#SysFatal(_)) {errorCode := "SysFatal" };
-                                            case(#CanisterReject(_)) {errorCode := "CanisterReject" };
-
-                                          };
-                                          return #err("Code: " # errorCode # " message: " # icError.message);
-                                      };
-                                      case(#InvalidHttpJsonRpcResponse(invalidHttpError)) {
-                                          return #err("Status: " # Nat16.toText(invalidHttpError.status) # " body: " # invalidHttpError.body);
-                                      };
-                                    };
-                                };
-                        };
-
+                        return(#err(HandleError.handleError(error)));
                 };
                 case(#Ok(msg)) { 
                     return #ok(msg);
@@ -166,19 +182,39 @@ actor {
         }; 
     };
 
-        public query func greet(name : Text) : async Text {
+    //change to receive an address
+    public shared func getContractMetadata() : async Result<Text, Text> {
+        // /getContractMetadata?contractAddress=0xe785E82358879F061BC3dcAC6f0444462D4b5330'
+
+        let newUrl = "https://eth-mainnet.g.alchemy.com/nft/v2/NRlM5XIU21Q7N-NKOILlZoS6LFrXb_ss/getContractMetadata?contractAddress=0xe785E82358879F061BC3dcAC6f0444462D4b5330";
+        let payload : Text = "{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"alchemy_getTokenMetadata\",\"params\":[\"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48\"]}";
+
+        let customRPCapi : EvmRpc.RpcApi = {
+                url = newUrl;
+                headers = null;
+        };
+
+        let rpcService : EvmRpc.RpcService = #Custom(customRPCapi);
+
+        Cycles.add(30_000_000_000_000);
+
+        let res : RequestResult = await evmRPC.request(rpcService, payload, maxbytes);
+        switch(res) {
+                case(#Err(error)) { 
+                        return(#err(HandleError.handleError(error)));
+                };
+                case(#Ok(msg)) { 
+                    return #ok(msg);
+                };
+        }; 
+    };
+
+    public query func greet(name : Text) : async Text {
         return "Hello, " # name # "!";
     };
 
     public shared query (msg) func whoami() : async Principal {
         return msg.caller;
     };
-
-    // public shared func  getBalanceNFT() : async Result<Text, Text> {
-    //     return #err("to implement");
-    // };
-
- 
-
 
 }

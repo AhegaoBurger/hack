@@ -1,4 +1,4 @@
-import Types "types";
+import Types "Types";
 import Map "mo:map/Map";
 import { nhash } "mo:map/Map";
 import Bool "mo:base/Bool";
