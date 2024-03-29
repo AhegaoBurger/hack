@@ -1,10 +1,10 @@
-# hack
+# Hack
 
-Welcome to your new hack project and to the internet computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
+Hack is a project developed to participate in the ICP Portugal Hackathon 24. Our goal was to fix a problem related to DAO's voting. Platforms like Snapshot do off-chain voting, because on-chain voting is too expensive, but with the Internet Computer Protocol it is not. Also, off-chain voting has several problems related to management and decentralization.
+Therefore we created our Web Application capable of creating communities and proposals while doing on-chain voting. This product is only an MVP but is already innovating by having the front and backend as ICP canisters and making HTTP Outcalls to Ethereum to get information to our backend.
 
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
 
-To learn more before you start working with hack, see the following documentation available online:
+To learn more before you start working with Hack, see the following documentation available online:
 
 - [Quick Start](https://internetcomputer.org/docs/current/developer-docs/setup/deploy-locally)
 - [SDK Developer Tools](https://internetcomputer.org/docs/current/developer-docs/setup/install)
